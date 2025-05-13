@@ -1,0 +1,315 @@
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class SinglyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    # Insert at beginning
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    # Insert at end
+    def insert_at_end(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        curr = self.head
+        while curr.next:
+            curr = curr.next
+        curr.next = new_node
+
+    # Insert at a specific position (0-based index)
+    def insert_at_position(self, data, position):
+        if position == 0:
+            self.insert_at_beginning(data)
+            return
+        new_node = Node(data)
+        curr = self.head
+        for _ in range(position - 1):
+            if not curr:
+                raise IndexError("Position out of range")
+            curr = curr.next
+        new_node.next = curr.next
+        curr.next = new_node
+
+    # Delete by value
+    def delete_by_value(self, value):
+        curr = self.head
+        if curr and curr.data == value:
+            self.head = curr.next
+            return
+        prev = None
+        while curr and curr.data != value:
+            prev = curr
+            curr = curr.next
+        if curr:
+            prev.next = curr.next
+
+    # Search for a value
+    def search(self, value):
+        curr = self.head
+        position = 0
+        while curr:
+            if curr.data == value:
+                return position
+            curr = curr.next
+            position += 1
+        return -1
+
+    # Display the list
+    def display(self):
+        curr = self.head
+        elems = []
+        while curr:
+            elems.append(str(curr.data))
+            curr = curr.next
+        print(" → ".join(elems) if elems else "Empty list")
+
+# Initialize list
+sll = SinglyLinkedList()
+
+# Insert at end
+sll.insert_at_end(1)
+sll.insert_at_end(2)
+sll.insert_at_end(3)
+sll.insert_at_end(4)
+print("After inserting at end:")
+sll.display()  # 1 → 2 → 3 → 4
+
+# Insert at end again
+sll.insert_at_end(5)
+print("After insert(5) at end:")
+sll.display()  # 1 → 2 → 3 → 4 → 5
+
+# Insert at beginning
+sll.insert_at_beginning(0)
+print("After insert(0) at beginning:")
+sll.display()  # 0 → 1 → 2 → 3 → 4 → 5
+
+# Insert at position
+sll.insert_at_position(9, 3)
+print("After insert(9) at position 3:")
+sll.display()  # 0 → 1 → 2 → 9 → 3 → 4 → 5
+
+# Delete node by value
+sll.delete_by_value(3)
+print("After delete(3):")
+sll.display()  # 0 → 1 → 2 → 9 → 4 → 5
+
+# Search for a node
+pos = sll.search(4)
+print(f"Search(4): Found at position {pos}")  # Expected: 4
+
+# Search for a non-existing node
+pos = sll.search(100)
+print(f"Search(100): Found at position {pos}")  # Expected: -1
+
+
+#Task 2: Detecting and Removing a Loop in a Linked List
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class LinkedListWithLoop:
+    def __init__(self):
+        self.head = None
+
+    def append(self, data):
+        """Append to the end of the list"""
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return new_node
+        temp = self.head
+        while temp.next:
+            temp = temp.next
+        temp.next = new_node
+        return new_node
+
+    def create_loop(self, pos):
+        """Create a loop by connecting the last node to the node at position `pos`"""
+        if pos < 0:
+            return
+        loop_start = self.head
+        for _ in range(pos):
+            if loop_start is None:
+                return
+            loop_start = loop_start.next
+
+        end = self.head
+        while end.next:
+            end = end.next
+        end.next = loop_start
+
+    def detect_loop(self):
+        """Detects loop using Floyd’s Algorithm"""
+        slow = fast = self.head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+            if slow == fast:
+                return slow  # Meeting point
+        return None
+
+    def find_start_of_loop(self):
+        """Finds start node of the loop if a loop exists"""
+        meeting_point = self.detect_loop()
+        if not meeting_point:
+            return None
+
+        start = self.head
+        while start != meeting_point:
+            start = start.next
+            meeting_point = meeting_point.next
+        return start
+
+    def remove_loop(self):
+        """Removes the loop without breaking the rest of the list"""
+        start_of_loop = self.find_start_of_loop()
+        if not start_of_loop:
+            return  # No loop
+
+        # Find the node before the start of loop
+        ptr = start_of_loop
+        while ptr.next != start_of_loop:
+            ptr = ptr.next
+        ptr.next = None
+
+    def display(self, limit=20):
+        """Display the list (with limit to avoid infinite loop)"""
+        result = []
+        curr = self.head
+        while curr and limit > 0:
+            result.append(str(curr.data))
+            curr = curr.next
+            limit -= 1
+        print(" → ".join(result) + (" ..." if limit == 0 else ""))
+
+# Create linked list
+ll = LinkedListWithLoop()
+nodes = [ll.append(i) for i in range(1, 6)]
+
+# Create a loop: Node 5 → Node 3
+ll.create_loop(2)
+
+# Detect and report loop
+start_node = ll.find_start_of_loop()
+if start_node:
+    print(f"Loop detected at node with value: {start_node.data}")
+else:
+    print("No loop detected.")
+
+# Remove the loop
+ll.remove_loop()
+
+# Display the fixed list
+print("Linked List after loop removal:")
+ll.display()
+
+#Task 3: Implementing a Doubly Linked List and Reverse Traversal
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.prev = None
+        self.next = None
+
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+
+    # Insert at beginning
+    def insert_at_beginning(self, data):
+        new_node = Node(data)
+        new_node.next = self.head
+        if self.head:
+            self.head.prev = new_node
+        self.head = new_node
+
+    # Insert at end
+    def insert_at_end(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        curr = self.head
+        while curr.next:
+            curr = curr.next
+        curr.next = new_node
+        new_node.prev = curr
+
+    # Delete node at a specific position (0-based index)
+    def delete_at_position(self, position):
+        if not self.head:
+            return
+
+        curr = self.head
+        if position == 0:
+            self.head = curr.next
+            if self.head:
+                self.head.prev = None
+            return
+
+        for _ in range(position):
+            curr = curr.next
+            if not curr:
+                return  # Position out of bounds
+
+        if curr.prev:
+            curr.prev.next = curr.next
+        if curr.next:
+            curr.next.prev = curr.prev
+
+    # Traverse forward
+    def traverse_forward(self):
+        result = []
+        curr = self.head
+        while curr:
+            result.append(str(curr.data))
+            curr = curr.next
+        print("Forward: " + " → ".join(result))
+        return result
+
+    # Traverse reverse
+    def traverse_reverse(self):
+        result = []
+        curr = self.head
+        if not curr:
+            print("Reverse: List is empty")
+            return result
+
+        # Go to the last node
+        while curr.next:
+            curr = curr.next
+
+        # Traverse backward
+        while curr:
+            result.append(str(curr.data))
+            curr = curr.prev
+        print("Reverse: " + " → ".join(result))
+        return result
+# Initialize DLL
+dll = DoublyLinkedList()
+
+# Insert at end
+for value in [1, 2, 3, 4, 5]:
+    dll.insert_at_end(value)
+
+# Display forward and reverse
+dll.traverse_forward()   # Output: 1 → 2 → 3 → 4 → 5
+dll.traverse_reverse()   # Output: 5 → 4 → 3 → 2 → 1
+
+# Insert at beginning
+dll.insert_at_beginning(0)
+dll.traverse_forward()   # Output: 0 → 1 → 2 → 3 → 4 → 5
+
+# Delete node at position 3 (value 2)
+dll.delete_at_position(3)
+dll.traverse_forward()   # Output: 0 → 1 → 2 → 4 → 5
+dll.traverse_reverse()   # Output: 5 → 4 → 2 → 1 → 0

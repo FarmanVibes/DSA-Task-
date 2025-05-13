@@ -1,0 +1,232 @@
+#Topic 4: Stacks & Queues
+
+ class StackArray:
+    def __init__(self):
+        self.stack = []
+
+    def push(self, element):
+        self.stack.append(element)
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("Pop from empty stack")
+        return self.stack.pop()
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError("Peek from empty stack")
+        return self.stack[-1]
+
+    def is_empty(self):
+        return len(self.stack) == 0
+
+    def size(self):
+        return len(self.stack)
+
+        class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+
+class StackLinkedList:
+    def __init__(self):
+        self.top = None
+        self.count = 0
+
+    def push(self, element):
+        new_node = Node(element)
+        new_node.next = self.top
+        self.top = new_node
+        self.count += 1
+
+    def pop(self):
+        if self.is_empty():
+            raise IndexError("Pop from empty stack")
+        popped = self.top.data
+        self.top = self.top.next
+        self.count -= 1
+        return popped
+
+    def peek(self):
+        if self.is_empty():
+            raise IndexError("Peek from empty stack")
+        return self.top.data
+
+    def is_empty(self):
+        return self.top is None
+
+    def size(self):
+        return self.count
+
+def test_stack(stack_class):
+    print(f"\nTesting {stack_class.__name__}")
+    s = stack_class()
+    s.push(10)
+    s.push(20)
+    s.push(30)
+    assert s.peek() == 30
+    assert s.pop() == 30
+    assert s.size() == 2
+    assert not s.is_empty()
+    s.pop()
+    s.pop()
+    assert s.is_empty()
+    print("All tests passed.")
+
+test_stack(StackArray)
+test_stack(StackLinkedList)
+
+Task 2: Evaluating Postfix Expressions Using Stacks
+
+def evaluate_postfix(expression):
+    stack = []
+    tokens = expression.split()
+
+    for token in tokens:
+        if token.isdigit() or (token.startswith('-') and token[1:].isdigit()):
+            stack.append(int(token))
+        else:
+            b = stack.pop()
+            a = stack.pop()
+            result = 0
+            if token == '+':
+                result = a + b
+            elif token == '-':
+                result = a - b
+            elif token == '*':
+                result = a * b
+            elif token == '/':
+                result = int(a / b)  # integer division
+            else:
+                raise ValueError(f"Unsupported operator: {token}")
+            stack.append(result)
+
+    if len(stack) != 1:
+        raise ValueError("Invalid postfix expression")
+
+    return stack.pop()
+# Test Case 1: Given example
+expr1 = "5 1 2 + 4 * + 3 -"
+print("Result:", evaluate_postfix(expr1))  # Expected: 14
+
+# Test Case 2: Simple addition
+expr2 = "2 3 +"
+print("Result:", evaluate_postfix(expr2))  # Expected: 5
+
+# Test Case 3: Mixed operations
+expr3 = "10 2 8 * + 3 -"
+# 2 * 8 = 16, 10 + 16 = 26, 26 - 3 = 23
+print("Result:", evaluate_postfix(expr3))  # Expected: 23
+
+# Test Case 4: Division
+expr4 = "20 4 /"
+print("Result:", evaluate_postfix(expr4))  # Expected: 5
+
+# Test Case 5: Complex expression
+expr5 = "7 8 + 3 2 + /"
+# 7 + 8 = 15, 3 + 2 = 5, 15 / 5 = 3
+print("Result:", evaluate_postfix(expr5))  # Expected: 3
+
+Task 3: Implementing a Circular Queue
+class CircularQueue:
+    def __init__(self, size):
+        self.size = size
+        self.queue = [None] * size
+        self.front_index = -1
+        self.rear_index = -1
+
+    def is_empty(self):
+        return self.front_index == -1
+
+    def is_full(self):
+        return (self.rear_index + 1) % self.size == self.front_index
+
+    def enqueue(self, element):
+        if self.is_full():
+            print("Queue is full!")
+            return
+        if self.is_empty():
+            self.front_index = 0
+        self.rear_index = (self.rear_index + 1) % self.size
+        self.queue[self.rear_index] = element
+
+    def dequeue(self):
+        if self.is_empty():
+            print("Queue is empty!")
+            return
+        removed = self.queue[self.front_index]
+        if self.front_index == self.rear_index:
+            # Only one element was present
+            self.front_index = -1
+            self.rear_index = -1
+        else:
+            self.front_index = (self.front_index + 1) % self.size
+        return removed
+
+    def front(self):
+        if self.is_empty():
+            return None
+        return self.queue[self.front_index]
+
+    def rear(self):
+        if self.is_empty():
+            return None
+        return self.queue[self.rear_index]
+
+    def __str__(self):
+        if self.is_empty():
+            return "CircularQueue([])"
+        result = []
+        i = self.front_index
+        while True:
+            result.append(self.queue[i])
+            if i == self.rear_index:
+                break
+            i = (i + 1) % self.size
+        return f"CircularQueue({result})"
+# Instantiate circular queue with capacity 5
+cq = CircularQueue(5)
+
+# Enqueue 5 elements
+cq.enqueue(10)
+cq.enqueue(20)
+cq.enqueue(30)
+cq.enqueue(40)
+cq.enqueue(50)
+print(cq)  # Output: CircularQueue([10, 20, 30, 40, 50])
+
+# Try to enqueue to full queue
+cq.enqueue(60)  # Should print "Queue is full!"
+
+# Dequeue one element
+cq.dequeue()  # Removes 10
+print(cq)  # Output: CircularQueue([20, 30, 40, 50])
+
+# Enqueue 60
+cq.enqueue(60)
+print(cq)  # Output: CircularQueue([20, 30, 40, 50, 60])
+
+# Front and Rear
+print("Front:", cq.front())  # Expected: 20
+print("Rear:", cq.rear())    # Expected: 60
+class LinearQueue:
+    def __init__(self):
+        self.queue = []
+
+    def enqueue(self, element):
+        self.queue.append(element)
+
+    def dequeue(self):
+        if self.is_empty():
+            print("Queue is empty!")
+            return
+        return self.queue.pop(0)  # Inefficient O(n)
+
+    def is_empty(self):
+        return len(self.queue) == 0
+
+    def front(self):
+        return self.queue[0] if not self.is_empty() else None
+
+    def rear(self):
+        return self.queue[-1] if not self.is_empty() else None
